@@ -1,0 +1,26 @@
+{
+  "name": "docui-server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soney/docui-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soney/docui-server/issues"
+  },
+  "homepage": "https://github.com/soney/docui-server#readme",
+  "dependencies": {
+    "@types/express": "^4.11.1",
+    "@types/ws": "^5.1.0",
+    "express": "^4.16.3",
+    "sdb-ts": "file:../sdb-ts",
+    "ws": "^5.1.1"
+  }
+}
