@@ -18,9 +18,12 @@
   "homepage": "https://github.com/soney/docui-server#readme",
   "dependencies": {
     "@types/express": "^4.11.1",
+    "@types/node": "^10.0.4",
     "@types/ws": "^5.1.0",
+    "docui": "file:///home/soney/code/docui",
     "express": "^4.16.3",
-    "sdb-ts": "file:../sdb-ts",
+    "sdb-ts": "file:///home/soney/code/sdb-ts",
+    "typescript": "^2.8.3",
     "ws": "^5.1.1"
   }
 }

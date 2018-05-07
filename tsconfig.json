@@ -6,9 +6,10 @@
         "declaration": true,
         "target": "es6",
         "sourceRoot": "src",
-        "outDir": "built"
+        "outDir": "built",
+        "types": ["sdb-ts"]
     },
-    "lib": [ ],
-    "include": [ "src/**/*" ],
-    "exclude": [ ]
+    "lib": [ "node" ],
+    "include": [ "src/index.ts" ],
+    "exclude": [ "node_modules" ]
 }
