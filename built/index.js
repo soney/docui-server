@@ -13,7 +13,7 @@ const wss = new WebSocket.Server({ server });
 const sdbServer = new sdb_ts_1.SDBServer({ wss });
 const counterDoc = sdbServer.get('example', 'counter');
 counterDoc.createIfEmpty({
-    counter: 0
+    code: ''
 });
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);

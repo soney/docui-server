@@ -3,6 +3,7 @@ import * as express from 'express';
 import * as WebSocket from 'ws';
 import {SDBServer, SDBDoc} from 'sdb-ts';
 import * as path from 'path';
+import {CodeDoc} from '../node_modules/docui/types/docTypes';
 
 const PORT:number = 8000;
 
@@ -16,10 +17,10 @@ const sdbServer = new SDBServer({wss});
 interface CounterDoc {
     counter:number
 }
-const counterDoc:SDBDoc<CounterDoc> = sdbServer.get<CounterDoc>('example', 'counter');
+const counterDoc:SDBDoc<CodeDoc> = sdbServer.get<CodeDoc>('example', 'counter');
 
 counterDoc.createIfEmpty({
-    counter: 0
+    code: ''
 });
 
 server.listen(PORT);
