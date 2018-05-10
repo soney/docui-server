@@ -22,6 +22,7 @@
     "@types/ws": "^5.1.0",
     "docui": "file:///home/soney/code/docui",
     "express": "^4.16.3",
+    "rich-text": "^3.1.0",
     "sdb-ts": "file:///home/soney/code/sdb-ts",
     "typescript": "^2.8.3",
     "ws": "^5.1.1"
