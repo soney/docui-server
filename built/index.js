@@ -17,12 +17,8 @@ const codeDoc = sdbServer.get('example', 'code');
 const quillDoc = sdbServer.get('example', 'quill');
 codeDoc.createIfEmpty({ code: '' });
 quillDoc.createIfEmpty([{ insert: 'Hi!' }], 'rich-text');
-codeDoc.subscribe(() => {
-    console.log(codeDoc.getData());
-});
-quillDoc.subscribe(() => {
-    console.log(quillDoc.getData());
-});
+// codeDoc.subscribe(() => { console.log(codeDoc.getData()); });
+// quillDoc.subscribe(() => { console.log(quillDoc.getData()); });
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);
 //# sourceMappingURL=index.js.map
