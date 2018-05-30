@@ -19,6 +19,10 @@ const sdbServer = new sdb_ts_1.SDBServer({ wss });
 sdb_ts_1.SDBServer.registerType(richText.type);
 const codeDoc = sdbServer.get('example', 'code');
 const quillDoc = sdbServer.get('example', 'quill');
+const stateDoc = sdbServer.get('example', 'state');
+stateDoc.createIfEmpty({
+    state: { x: '' }
+});
 codeDoc.createIfEmpty({ code: `
 import * as React from 'react';
 
@@ -36,16 +40,15 @@ codeDoc.subscribe(lodash_1.throttle(() => {
     if (data) {
         try {
             const blotFunction = compile_ts_1.runTSCode(data.code).default;
-            console.log(blotFunction({ name: 'Steve' }));
-            const str = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            console.log(str);
+            const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
+            stateDoc.submitObjectInsertOp(['state', 'x'], x);
         }
         catch (e) {
             console.error(e);
         }
     }
 }, 1000));
-// quillDoc.subscribe(() => { console.log(quillDoc.getData()); });
+// quillDoc.subscribe((ops:any[], source:any):void => { });
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);
 //# sourceMappingURL=index.js.map
