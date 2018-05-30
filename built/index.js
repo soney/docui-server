@@ -6,6 +6,8 @@ const WebSocket = require("ws");
 const sdb_ts_1 = require("sdb-ts");
 const path = require("path");
 const richText = require("rich-text");
+const ReactDOMServer = require("react-dom/server");
+const React = require("react");
 const compile_ts_1 = require("./compile_ts");
 const lodash_1 = require("lodash");
 const PORT = 8000;
@@ -17,12 +19,30 @@ const sdbServer = new sdb_ts_1.SDBServer({ wss });
 sdb_ts_1.SDBServer.registerType(richText.type);
 const codeDoc = sdbServer.get('example', 'code');
 const quillDoc = sdbServer.get('example', 'quill');
-codeDoc.createIfEmpty({ code: '' });
-quillDoc.createIfEmpty([{ insert: 'Hi!' }], 'rich-text');
+codeDoc.createIfEmpty({ code: `
+import * as React from 'react';
+
+export default ({name}) => (
+ <div>{\`Hi \${name}\`}</div>
+);
+` });
+quillDoc.createIfEmpty([{ insert: `
+XXXXXXXXXXXX XXXXXXXXXXXXX
+YYYYYYYYYYYY YYYYYYYYYYYYY
+ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
+` }], 'rich-text');
 codeDoc.subscribe(lodash_1.throttle(() => {
     const data = codeDoc.getData();
     if (data) {
-        compile_ts_1.runTSCode(data.code);
+        try {
+            const blotFunction = compile_ts_1.runTSCode(data.code).default;
+            console.log(blotFunction({ name: 'Steve' }));
+            const str = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
+            console.log(str);
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
 }, 1000));
 // quillDoc.subscribe(() => { console.log(quillDoc.getData()); });
