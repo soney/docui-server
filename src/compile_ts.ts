@@ -13,11 +13,10 @@ const vm = new NodeVM({
     sandbox,
 });
 
-function tsCompiler(code:string, filename?:string):string {
+export function tsCompiler(code:string):string {
     const transpileResult:ts.TranspileOutput = ts.transpileModule(code, { compilerOptions: { jsx: ts.JsxEmit.React, sourceMap: false} });
     const {outputText, sourceMapText} = transpileResult;
     // const sourceMap = JSON.parse(sourceMapText);
-    console.log(outputText);
     return outputText;
 };
 
