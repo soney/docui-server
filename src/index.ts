@@ -7,11 +7,11 @@ import * as richText from 'rich-text';
 import {CodeDoc, QuillDoc, StateDoc} from '../node_modules/docui/types/docTypes';
 import * as ReactDOMServer from 'react-dom/server';
 import * as React from 'react';
-import {runTSCode, tsCompiler} from './compile_ts';
+import {TSXCompiler} from './compile_ts';
 import {throttle} from 'lodash';
 import * as Quill from 'quill';
 import { JSDOM } from 'jsdom';
-import {InlineBlotDisplay} from './InlineBlotDisplay';
+import {InlineBlotDisplay} from './InlineBlot';
 
 const PORT:number = 8000;
 
@@ -66,9 +66,9 @@ displayCodeDoc.subscribe(throttle(() => {
     if(data) {
         try {
             const blotDisplay:string = tsCompiler(data.code);
-            console.log(blotDisplay);
+            // console.log(blotDisplay);
             // const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            // stateDoc.submitObjectInsertOp(['state', 'x'], x);
+            // stateDoc.submitObjectInsertOp(['state', 'x'], data.code);
         } catch(e) {
             console.error(e);
         }
