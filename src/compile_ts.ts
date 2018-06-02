@@ -27,7 +27,7 @@ export class TSXCompiler {
         return outputText;
     };
 
-    private runTSXCode(code:string, filename:string='./code.tsx'):any {
+    public runTSXCode(code:string, filename:string='./code.tsx'):any {
         try {
             const script = new VMScript(TSXCompiler.convertTSXToJavaScript(code));
             const classDefinition:any = this.vm.run(script, filename);

@@ -11,7 +11,7 @@ import {TSXCompiler} from './compile_ts';
 import {throttle} from 'lodash';
 import * as Quill from 'quill';
 import { JSDOM } from 'jsdom';
-import {InlineBlotDisplay} from './InlineBlot';
+import {InlineBlotDisplay, InlineBlotBackend} from './InlineBlot';
 
 const PORT:number = 8000;
 
@@ -29,6 +29,9 @@ const backendCodeDoc:SDBDoc<CodeDoc> = sdbServer.get<CodeDoc>('example', 'backen
 const quillDoc:SDBDoc<QuillDoc> = sdbServer.get<QuillDoc>('example', 'quill');
 const stateDoc:SDBDoc<StateDoc> = sdbServer.get<StateDoc>('example', 'state');
 
+const backendCompiler = new TSXCompiler({
+    sandbox: {}
+});
 stateDoc.createIfEmpty({
     state: { x: '' }
 });
@@ -61,28 +64,14 @@ ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
 `}], 'rich-text');
 
 
-displayCodeDoc.subscribe(throttle(() => {
-    const data = displayCodeDoc.getData();
-    if(data) {
-        try {
-            const blotDisplay:string = tsCompiler(data.code);
-            // console.log(blotDisplay);
-            // const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            // stateDoc.submitObjectInsertOp(['state', 'x'], data.code);
-        } catch(e) {
-            console.error(e);
-        }
-    }
-}, 1000));
 backendCodeDoc.subscribe(throttle(() => {
     const data = backendCodeDoc.getData();
     if(data) {
+        const {code} = data;
         try {
-            const blotDisplay:InlineBlotDisplay = runTSCode(data.code).default;
-            // const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            // stateDoc.submitObjectInsertOp(['state', 'x'], x);
+            const result = backendCompiler.runTSXCode(code);
+            console.log(result);
         } catch(e) {
-            console.error(e);
         }
     }
 }, 1000));
