@@ -1,5 +1,8 @@
-import { NodeVM } from 'vm2';
-export declare const sandbox: {};
-export declare const vm: NodeVM;
-export declare function tsCompiler(code: string): string;
-export declare function runTSCode(code: string): any;
+import { NodeVMOptions } from 'vm2';
+export declare class TSXCompiler {
+    private sandbox;
+    private vm;
+    constructor(vmOptions?: NodeVMOptions);
+    private static convertTSXToJavaScript(code);
+    runTSXCode(code: string, filename?: string): any;
+}

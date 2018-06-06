@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as eval2 from 'eval2';
 import {NodeVM, VMScript, NodeVMOptions} from 'vm2';
 import {merge} from 'lodash';
+import * as path from 'path';
 
 const DEFAULT_NODE_VM_OPTIONS = {
     require: {
@@ -27,7 +28,7 @@ export class TSXCompiler {
         return outputText;
     };
 
-    public runTSXCode(code:string, filename:string='./code.tsx'):any {
+    public runTSXCode(code:string, filename:string=path.join(__dirname, 'code.tsx')):any {
         try {
             const script = new VMScript(TSXCompiler.convertTSXToJavaScript(code));
             const classDefinition:any = this.vm.run(script, filename);

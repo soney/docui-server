@@ -2,35 +2,39 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const vm2_1 = require("vm2");
-exports.sandbox = {};
-exports.vm = new vm2_1.NodeVM({
+const lodash_1 = require("lodash");
+const DEFAULT_NODE_VM_OPTIONS = {
     require: {
         external: true,
         root: './',
         builtin: ['react', 'react-dom']
     },
-    // compiler: tsCompiler,
-    sandbox: exports.sandbox,
-});
-function tsCompiler(code) {
-    const transpileResult = ts.transpileModule(code, { compilerOptions: { jsx: ts.JsxEmit.React, sourceMap: false } });
-    const { outputText, sourceMapText } = transpileResult;
-    // const sourceMap = JSON.parse(sourceMapText);
-    return outputText;
-}
-exports.tsCompiler = tsCompiler;
-;
-function runTSCode(code) {
-    try {
-        const script = new vm2_1.VMScript(tsCompiler(code));
-        const classDefinition = exports.vm.run(script, './code.tsx');
-        console.log(classDefinition);
-        return classDefinition;
+    sandbox: {}
+};
+class TSXCompiler {
+    constructor(vmOptions = {}) {
+        this.vm = new vm2_1.NodeVM(lodash_1.merge({}, DEFAULT_NODE_VM_OPTIONS, vmOptions));
     }
-    catch (e) {
-        console.error(e);
+    ;
+    static convertTSXToJavaScript(code) {
+        const transpileResult = ts.transpileModule(code, { compilerOptions: { jsx: ts.JsxEmit.React, sourceMap: false } });
+        const { outputText, sourceMapText } = transpileResult;
+        // const sourceMap = JSON.parse(sourceMapText);
+        return outputText;
     }
+    ;
+    runTSXCode(code, filename = './code.tsx') {
+        try {
+            const script = new vm2_1.VMScript(TSXCompiler.convertTSXToJavaScript(code));
+            const classDefinition = this.vm.run(script, filename);
+            return classDefinition;
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    ;
 }
-exports.runTSCode = runTSCode;
+exports.TSXCompiler = TSXCompiler;
 ;
 //# sourceMappingURL=compile_ts.js.map

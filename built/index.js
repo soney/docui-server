@@ -19,6 +19,9 @@ const displayCodeDoc = sdbServer.get('example', 'display-code');
 const backendCodeDoc = sdbServer.get('example', 'backend-code');
 const quillDoc = sdbServer.get('example', 'quill');
 const stateDoc = sdbServer.get('example', 'state');
+const backendCompiler = new compile_ts_1.TSXCompiler({
+    sandbox: {}
+});
 stateDoc.createIfEmpty({
     state: { x: '' }
 });
@@ -48,34 +51,31 @@ XXXXXXXXXXXX XXXXXXXXXXXXX
 YYYYYYYYYYYY YYYYYYYYYYYYY
 ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
 ` }], 'rich-text');
-displayCodeDoc.subscribe(lodash_1.throttle(() => {
-    const data = displayCodeDoc.getData();
-    if (data) {
-        try {
-            const blotDisplay = compile_ts_1.tsCompiler(data.code);
-            console.log(blotDisplay);
-            // const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            // stateDoc.submitObjectInsertOp(['state', 'x'], x);
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-}, 1000));
 backendCodeDoc.subscribe(lodash_1.throttle(() => {
     const data = backendCodeDoc.getData();
     if (data) {
+        const { code } = data;
         try {
-            const blotDisplay = compile_ts_1.runTSCode(data.code).default;
-            // const x = ReactDOMServer.renderToString(React.createElement(blotFunction, { name: 'Steve' }));
-            // stateDoc.submitObjectInsertOp(['state', 'x'], x);
+            const result = backendCompiler.runTSXCode(code);
+            console.log(result);
         }
         catch (e) {
-            console.error(e);
         }
     }
 }, 1000));
 // quillDoc.subscribe((ops:any[], source:any):void => { });
+(() => {
+    const code = `
+import {InlineBlotBackend} from './src/InlineBlot';
+import * as React from 'react';
+console.log(__dirname);
+
+export default class WidgetBackend extends InlineBlotBackend {
+};
+`;
+    const result = backendCompiler.runTSXCode(code);
+    console.log(result);
+})();
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);
 //# sourceMappingURL=index.js.map

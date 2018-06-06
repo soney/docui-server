@@ -77,5 +77,18 @@ backendCodeDoc.subscribe(throttle(() => {
 }, 1000));
 // quillDoc.subscribe((ops:any[], source:any):void => { });
 
+(() => {
+    const code = `
+import {InlineBlotBackend} from './src/InlineBlot';
+import * as React from 'react';
+console.log(__dirname);
+
+export default class WidgetBackend extends InlineBlotBackend {
+};
+`;
+const result = backendCompiler.runTSXCode(code);
+    console.log(result);
+})();
+
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);
