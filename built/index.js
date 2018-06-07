@@ -66,7 +66,7 @@ backendCodeDoc.subscribe(lodash_1.throttle(() => {
 // quillDoc.subscribe((ops:any[], source:any):void => { });
 (() => {
     const code = `
-import {InlineBlotBackend} from './src/InlineBlot';
+import {InlineBlotBackend} from './InlineBlot';
 import * as React from 'react';
 console.log(__dirname);
 

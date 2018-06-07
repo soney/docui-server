@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const vm2_1 = require("vm2");
 const lodash_1 = require("lodash");
+const path = require("path");
 const DEFAULT_NODE_VM_OPTIONS = {
     require: {
         external: true,
@@ -23,7 +24,7 @@ class TSXCompiler {
         return outputText;
     }
     ;
-    runTSXCode(code, filename = './code.tsx') {
+    runTSXCode(code, filename = path.join(__dirname, 'code.tsx')) {
         try {
             const script = new vm2_1.VMScript(TSXCompiler.convertTSXToJavaScript(code));
             const classDefinition = this.vm.run(script, filename);

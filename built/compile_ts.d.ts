@@ -3,6 +3,6 @@ export declare class TSXCompiler {
     private sandbox;
     private vm;
     constructor(vmOptions?: NodeVMOptions);
-    private static convertTSXToJavaScript(code);
+    private static convertTSXToJavaScript;
     runTSXCode(code: string, filename?: string): any;
 }

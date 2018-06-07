@@ -79,7 +79,7 @@ backendCodeDoc.subscribe(throttle(() => {
 
 (() => {
     const code = `
-import {InlineBlotBackend} from './src/InlineBlot';
+import {InlineBlotBackend} from './InlineBlot';
 import * as React from 'react';
 console.log(__dirname);
 
