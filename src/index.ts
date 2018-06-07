@@ -77,18 +77,33 @@ backendCodeDoc.subscribe(throttle(() => {
 }, 1000));
 // quillDoc.subscribe((ops:any[], source:any):void => { });
 
-(() => {
+setTimeout(() => {
     const code = `
-import {InlineBlotBackend} from './InlineBlot';
-import * as React from 'react';
-console.log(__dirname);
+import {InlineBlotBackend, InlineBlotInterface} from './InlineBlot';
 
-export default class WidgetBackend extends InlineBlotBackend {
+export default class WidgetBackend implements InlineBlotInterface {
+    public constructor(private backend:InlineBlotBackend) {
+    };
+    public onAdded():void {
+        this.backend.setState({
+            abc: 10
+        });
+        console.log(this.backend.getState('abc'));
+    };
+    public onRemvoed():void {
+
+    };
+    public onTextContentChanged():void {
+
+    };
 };
 `;
-const result = backendCompiler.runTSXCode(code);
-    console.log(result);
-})();
+    const BackendClass = backendCompiler.runTSXCode(code)['default'];
+    // console.log(BackendClass);
+    const backend = new InlineBlotBackend(stateDoc);
+    const backendInstance = new BackendClass(backend);
+    console.log(backendInstance.onAdded());
+}, 300);
 
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);

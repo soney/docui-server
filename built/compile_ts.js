@@ -2,14 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const vm2_1 = require("vm2");
+// import * as vm from 'vm';
 const lodash_1 = require("lodash");
 const path = require("path");
 const DEFAULT_NODE_VM_OPTIONS = {
-    require: {
-        external: true,
-        root: './',
-        builtin: ['react', 'react-dom']
-    },
     sandbox: {}
 };
 class TSXCompiler {
@@ -26,8 +22,8 @@ class TSXCompiler {
     ;
     runTSXCode(code, filename = path.join(__dirname, 'code.tsx')) {
         try {
-            const script = new vm2_1.VMScript(TSXCompiler.convertTSXToJavaScript(code));
-            const classDefinition = this.vm.run(script, filename);
+            const jsCode = new vm2_1.VMScript(TSXCompiler.convertTSXToJavaScript(code));
+            const classDefinition = this.vm.run(jsCode, filename);
             return classDefinition;
         }
         catch (e) {
