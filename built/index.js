@@ -70,17 +70,24 @@ setTimeout(() => {
 import {InlineBlotBackend, InlineBlotInterface} from './InlineBlot';
 
 export default class WidgetBackend implements InlineBlotInterface {
+    private abc:number = 0;
     public constructor(private backend:InlineBlotBackend) {
     };
+
     public onAdded():void {
-        this.backend.setState({
-            abc: 10
-        });
-        console.log(this.backend.getState('abc'));
+        setInterval(() => {
+            this.abc++;
+            console.log(this.abc);
+            this.backend.setState({
+                abc: this.abc
+            });
+        }, 2000);
     };
-    public onRemvoed():void {
+
+    public onRemoved():void {
 
     };
+
     public onTextContentChanged():void {
 
     };

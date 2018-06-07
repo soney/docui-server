@@ -12,11 +12,13 @@ export abstract class InlineBlotDisplay {
 export class InlineBlotBackend {
     public constructor(private stateDoc:SDBDoc<StateDoc>) {
     };
+
     public setState(state:{[key:string]:any}):void {
         each(state, (value:any, key:string) => {
             this.stateDoc.submitObjectReplaceOp(['state', key], value);
         });
     };
+
     public getState(key:string):any {
         const {state} = this.stateDoc.getData();
         if(has(state, key)) {
