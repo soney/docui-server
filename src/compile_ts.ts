@@ -25,9 +25,13 @@ export class TSXCompiler {
         return outputText;
     };
 
+    public transpileTSXCode(code:string):string {
+        return TSXCompiler.convertTSXToJavaScript(code);
+    };
+
     public runTSXCode(code:string, filename:string=path.join(__dirname, 'code.tsx')):any {
         try {
-            const jsCode = new VMScript(TSXCompiler.convertTSXToJavaScript(code));
+            const jsCode = new VMScript(this.transpileTSXCode(code));
             const classDefinition:any = this.vm.run(jsCode, filename);
             return classDefinition;
         } catch(e) {

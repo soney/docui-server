@@ -4,5 +4,6 @@ export declare class TSXCompiler {
     private vm;
     constructor(vmOptions?: NodeVMOptions);
     private static convertTSXToJavaScript(code);
+    transpileTSXCode(code: string): string;
     runTSXCode(code: string, filename?: string): any;
 }

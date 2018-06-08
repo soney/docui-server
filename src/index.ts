@@ -4,7 +4,7 @@ import * as WebSocket from 'ws';
 import {SDBServer, SDBDoc} from 'sdb-ts';
 import * as path from 'path';
 import * as richText from 'rich-text';
-import {CodeDoc, QuillDoc, StateDoc} from '../node_modules/docui/types/docTypes';
+import {DisplayCodeDoc, BackendCodeDoc, QuillDoc, StateDoc} from '../node_modules/docui/types/docTypes';
 import * as ReactDOMServer from 'react-dom/server';
 import * as React from 'react';
 import {TSXCompiler} from './compile_ts';
@@ -24,37 +24,33 @@ const sdbServer = new SDBServer({wss});
 
 SDBServer.registerType(richText.type);
 
-const displayCodeDoc:SDBDoc<CodeDoc> = sdbServer.get<CodeDoc>('example', 'display-code');
-const backendCodeDoc:SDBDoc<CodeDoc> = sdbServer.get<CodeDoc>('example', 'backend-code');
+const displayCodeDoc:SDBDoc<DisplayCodeDoc> = sdbServer.get<DisplayCodeDoc>('example', 'display-code');
+const backendCodeDoc:SDBDoc<BackendCodeDoc> = sdbServer.get<BackendCodeDoc>('example', 'backend-code');
 const quillDoc:SDBDoc<QuillDoc> = sdbServer.get<QuillDoc>('example', 'quill');
 const stateDoc:SDBDoc<StateDoc> = sdbServer.get<StateDoc>('example', 'state');
 
 const backendCompiler = new TSXCompiler({
     sandbox: {}
 });
+const displayCompiler = new TSXCompiler({
+    sandbox: {}
+});
 stateDoc.createIfEmpty({
     state: { x: '' }
 });
 displayCodeDoc.createIfEmpty({ code: `
-import * as React from 'react';
+export default class WidgetDisplay {
+    public constructor(private displayBackend) {
 
-export default ({name}) => (
-    <div>Hello!</div>
-);
-`});
-backendCodeDoc.createIfEmpty({ code: `
-import {InlineBlotDisplay} from './InlineBlotDisplay';
-import * as React from 'react';
-
-export default class MyDisplay extends InlineBlotDisplay {
+    };
     public render():React.ReactNode {
-        return <div>Hello!</div>;
+        const abc = this.displayBackend.getState('abc');
+        const greeting = 'hello';
+        return <div>{greeting} {abc}</div>;
     };
 };
-
-export default ({name}) => (
- <div>{\`Hi \${name}\`}</div>
-);
+`});
+backendCodeDoc.createIfEmpty({ code: `
 ` });
 
 quillDoc.createIfEmpty([{insert: `
@@ -64,13 +60,26 @@ ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
 `}], 'rich-text');
 
 
+displayCodeDoc.subscribe(throttle((type:string, ops) => {
+    const data = displayCodeDoc.getData();
+    if(data) {
+        if(type === "create" || (type === "op" && ops[0].p[0]==='code')) {
+            const {code} = data;
+            try {
+                const jsCode = displayCompiler.transpileTSXCode(code);
+                displayCodeDoc.submitObjectReplaceOp(['jsCode'], jsCode);
+                console.log(jsCode);
+            } catch(e) {
+            }
+        }
+    }
+}, 1000));
 backendCodeDoc.subscribe(throttle(() => {
     const data = backendCodeDoc.getData();
     if(data) {
         const {code} = data;
         try {
             const result = backendCompiler.runTSXCode(code);
-            console.log(result);
         } catch(e) {
         }
     }
@@ -87,9 +96,9 @@ export default class WidgetBackend implements InlineBlotInterface {
     };
 
     public onAdded():void {
-        setInterval(() => {
+        this.interval = setInterval(() => {
             this.abc++;
-            console.log(this.abc);
+            // console.log(this.abc);
             this.backend.setState({
                 abc: this.abc
             });
@@ -97,7 +106,7 @@ export default class WidgetBackend implements InlineBlotInterface {
     };
 
     public onRemoved():void {
-
+        clearInterval(this.interval);
     };
 
     public onTextContentChanged():void {
@@ -106,7 +115,6 @@ export default class WidgetBackend implements InlineBlotInterface {
 };
 `;
     const BackendClass = backendCompiler.runTSXCode(code)['default'];
-    // console.log(BackendClass);
     const backend = new InlineBlotBackend(stateDoc);
     const backendInstance = new BackendClass(backend);
     console.log(backendInstance.onAdded());

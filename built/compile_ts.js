@@ -20,9 +20,13 @@ class TSXCompiler {
         return outputText;
     }
     ;
+    transpileTSXCode(code) {
+        return TSXCompiler.convertTSXToJavaScript(code);
+    }
+    ;
     runTSXCode(code, filename = path.join(__dirname, 'code.tsx')) {
         try {
-            const jsCode = new vm2_1.VMScript(TSXCompiler.convertTSXToJavaScript(code));
+            const jsCode = new vm2_1.VMScript(this.transpileTSXCode(code));
             const classDefinition = this.vm.run(jsCode, filename);
             return classDefinition;
         }

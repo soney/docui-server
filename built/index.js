@@ -23,42 +23,52 @@ const stateDoc = sdbServer.get('example', 'state');
 const backendCompiler = new compile_ts_1.TSXCompiler({
     sandbox: {}
 });
+const displayCompiler = new compile_ts_1.TSXCompiler({
+    sandbox: {}
+});
 stateDoc.createIfEmpty({
     state: { x: '' }
 });
 displayCodeDoc.createIfEmpty({ code: `
-import * as React from 'react';
+export default class WidgetDisplay {
+    public constructor(private displayBackend) {
 
-export default ({name}) => (
-    <div>Hello!</div>
-);
-` });
-backendCodeDoc.createIfEmpty({ code: `
-import {InlineBlotDisplay} from './InlineBlotDisplay';
-import * as React from 'react';
-
-export default class MyDisplay extends InlineBlotDisplay {
+    };
     public render():React.ReactNode {
-        return <div>Hello!</div>;
+        const abc = this.displayBackend.getState('abc');
+        const greeting = 'hello';
+        return <div>{greeting} {abc}</div>;
     };
 };
-
-export default ({name}) => (
- <div>{\`Hi \${name}\`}</div>
-);
+` });
+backendCodeDoc.createIfEmpty({ code: `
 ` });
 quillDoc.createIfEmpty([{ insert: `
 XXXXXXXXXXXX XXXXXXXXXXXXX
 YYYYYYYYYYYY YYYYYYYYYYYYY
 ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
 ` }], 'rich-text');
+displayCodeDoc.subscribe(lodash_1.throttle((type, ops) => {
+    const data = displayCodeDoc.getData();
+    if (data) {
+        if (type === "create" || (type === "op" && ops[0].p[0] === 'code')) {
+            const { code } = data;
+            try {
+                const jsCode = displayCompiler.transpileTSXCode(code);
+                displayCodeDoc.submitObjectReplaceOp(['jsCode'], jsCode);
+                console.log(jsCode);
+            }
+            catch (e) {
+            }
+        }
+    }
+}, 1000));
 backendCodeDoc.subscribe(lodash_1.throttle(() => {
     const data = backendCodeDoc.getData();
     if (data) {
         const { code } = data;
         try {
             const result = backendCompiler.runTSXCode(code);
-            console.log(result);
         }
         catch (e) {
         }
@@ -75,9 +85,9 @@ export default class WidgetBackend implements InlineBlotInterface {
     };
 
     public onAdded():void {
-        setInterval(() => {
+        this.interval = setInterval(() => {
             this.abc++;
-            console.log(this.abc);
+            // console.log(this.abc);
             this.backend.setState({
                 abc: this.abc
             });
@@ -85,7 +95,7 @@ export default class WidgetBackend implements InlineBlotInterface {
     };
 
     public onRemoved():void {
-
+        clearInterval(this.interval);
     };
 
     public onTextContentChanged():void {
@@ -94,7 +104,6 @@ export default class WidgetBackend implements InlineBlotInterface {
 };
 `;
     const BackendClass = backendCompiler.runTSXCode(code)['default'];
-    // console.log(BackendClass);
     const backend = new InlineBlot_1.InlineBlotBackend(stateDoc);
     const backendInstance = new BackendClass(backend);
     console.log(backendInstance.onAdded());
