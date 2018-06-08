@@ -5,8 +5,12 @@ import {NodeVM, VMScript, NodeVMOptions} from 'vm2';
 import {merge} from 'lodash';
 import * as path from 'path';
 
-const DEFAULT_NODE_VM_OPTIONS = {
+const DEFAULT_NODE_VM_OPTIONS:NodeVMOptions = {
     sandbox: {}
+};
+const DEFAULT_TRANSPILE_OPTIONS:ts.CompilerOptions = {
+    jsx: ts.JsxEmit.React,
+    sourceMap: false
 };
 
 export class TSXCompiler {
@@ -14,19 +18,15 @@ export class TSXCompiler {
     // private vm:vm.Context;
     private vm:NodeVM;
 
-    public constructor(vmOptions:NodeVMOptions={}) {
+    public constructor(vmOptions:NodeVMOptions={}, private transpileOptions:ts.CompilerOptions={}) {
         this.vm = new NodeVM(merge({}, DEFAULT_NODE_VM_OPTIONS, vmOptions));
     };
 
-    private static convertTSXToJavaScript(code:string):string {
-        const transpileResult:ts.TranspileOutput = ts.transpileModule(code, { compilerOptions: { jsx: ts.JsxEmit.React, sourceMap: false} });
+    public transpileTSXCode(code:string):string {
+        const transpileResult:ts.TranspileOutput = ts.transpileModule(code, { compilerOptions:  merge({}, DEFAULT_TRANSPILE_OPTIONS, this.transpileOptions)});
         const {outputText, sourceMapText} = transpileResult;
         // const sourceMap = JSON.parse(sourceMapText);
         return outputText;
-    };
-
-    public transpileTSXCode(code:string):string {
-        return TSXCompiler.convertTSXToJavaScript(code);
     };
 
     public runTSXCode(code:string, filename:string=path.join(__dirname, 'code.tsx')):any {
