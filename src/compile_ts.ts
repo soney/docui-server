@@ -30,12 +30,8 @@ export class TSXCompiler {
     };
 
     public runTSXCode(code:string, filename:string=path.join(__dirname, 'code.tsx')):any {
-        try {
-            const jsCode = new VMScript(this.transpileTSXCode(code));
-            const classDefinition:any = this.vm.run(jsCode, filename);
-            return classDefinition;
-        } catch(e) {
-            console.error(e);
-        }
+        const jsCode = new VMScript(this.transpileTSXCode(code));
+        const classDefinition:any = this.vm.run(jsCode, filename);
+        return classDefinition;
     };
 };

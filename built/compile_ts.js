@@ -26,14 +26,9 @@ class TSXCompiler {
     }
     ;
     runTSXCode(code, filename = path.join(__dirname, 'code.tsx')) {
-        try {
-            const jsCode = new vm2_1.VMScript(this.transpileTSXCode(code));
-            const classDefinition = this.vm.run(jsCode, filename);
-            return classDefinition;
-        }
-        catch (e) {
-            console.error(e);
-        }
+        const jsCode = new vm2_1.VMScript(this.transpileTSXCode(code));
+        const classDefinition = this.vm.run(jsCode, filename);
+        return classDefinition;
     }
     ;
 }

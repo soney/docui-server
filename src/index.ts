@@ -8,7 +8,7 @@ import {DisplayCodeDoc, BackendCodeDoc, QuillDoc, StateDoc, FormatDoc} from '../
 import * as ReactDOMServer from 'react-dom/server';
 import * as React from 'react';
 import {TSXCompiler} from './compile_ts';
-import {throttle} from 'lodash';
+import {throttle, has} from 'lodash';
 import * as Quill from 'quill';
 import { JSDOM } from 'jsdom';
 import {InlineBlotDisplay, InlineBlotBackend} from './InlineBlot';
@@ -23,24 +23,90 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 const sdbServer = new SDBServer({wss});
 
+const backendClasess:Map<string, any> = new Map<string, any>();
+
+function setBackendClass(name:string, value:any) {
+    backendClasess.set(name, value);
+}
+function getBackendClass(name:string):any {
+    return backendClasess.get(name);
+}
+
 SDBServer.registerType(richText.type);
 
-const formats:SDBDoc<FormatDoc> = sdbServer.get<FormatDoc>('docui', 'formats');
+const formatsDoc:SDBDoc<FormatDoc> = sdbServer.get<FormatDoc>('docui', 'formats');
 const quillDoc:SDBDoc<QuillDoc> = sdbServer.get<QuillDoc> ('docs', 'example');
-formats.createIfEmpty({formats: []});
+formatsDoc.createIfEmpty({formats: []});
+
+const backendCompiler = new TSXCompiler({
+    sandbox: {}
+});
+const displayCompiler = new TSXCompiler({
+    sandbox: {}
+}, {
+    module: ts.ModuleKind.None
+});
+
+function updateBackendCode(index:number) {
+    const data = formatsDoc.getData();
+    const p = ['formats', index, 'backendCode'];
+    const backendCode = data.formats[index].backendCode.code;
+    const name = data.formats[index].name;
+    try {
+        const backendCodeResult = backendCompiler.runTSXCode(backendCode);
+        if(!has(backendCodeResult, 'default')) {
+            throw new Error('Could not find default export');
+        }
+        const BackendClass = backendCodeResult['default'];
+        setBackendClass(name, BackendClass);
+        formatsDoc.submitObjectReplaceOp(p.concat('error'), null);
+    } catch(e) {
+        formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
+    }
+    console.log('update backend code for ' + name);
+}
+function updateDisplayCode(index:number) {
+    const data = formatsDoc.getData();
+    const p = ['formats', index, 'displayCode'];
+    const displayCode = data.formats[index].displayCode.code;
+    const name = data.formats[index].name;
+    try {
+        const jsDisplayCode = displayCompiler.transpileTSXCode(displayCode);
+        formatsDoc.submitObjectReplaceOp(p.concat('jsCode'), jsDisplayCode);
+        formatsDoc.submitObjectReplaceOp(p.concat('error'), null);
+    } catch(e) {
+        formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
+    }
+    console.log('update frontend code for ' + name);
+}
+
+formatsDoc.subscribe((type, ops) => {
+    const data = formatsDoc.getData();
+    if(data) {
+        if(type === 'op') {
+            const {formats} = data;
+            ops.forEach((op) => {
+                if(op.p.length === 2 && op.p[0] === 'formats' && has(op, 'li') && !has(op, 'ld')) { // new format added
+                    const index:number = op.p[1];
+                    updateDisplayCode(index);
+                    updateBackendCode(index);
+                } else if(op.p.length === 5 && op.p[3] === 'code' && (has(op, 'si') || has(op, 'sd'))) { //modified
+                    const isBackend = op.p[2] === 'backendCode';
+                    const index:number = op.p[1];
+                    if(isBackend) {
+                        updateBackendCode(index);
+                    } else {
+                        updateDisplayCode(index);
+                    }
+                }
+            });
+        }
+    }
+});
 
 // const displayCodeDoc:SDBDoc<DisplayCodeDoc> = sdbServer.get<DisplayCodeDoc>('example', 'display-code');
 // const backendCodeDoc:SDBDoc<BackendCodeDoc> = sdbServer.get<BackendCodeDoc>('example', 'backend-code');
 // const stateDoc:SDBDoc<StateDoc> = sdbServer.get<StateDoc>('example', 'state');
-
-// const backendCompiler = new TSXCompiler({
-//     sandbox: {}
-// });
-// const displayCompiler = new TSXCompiler({
-//     sandbox: {}
-// }, {
-//     module: ts.ModuleKind.None
-// });
 
 // stateDoc.createIfEmpty({
 //     state: { x: '' }
