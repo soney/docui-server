@@ -26,6 +26,11 @@ sdb_ts_1.SDBServer.registerType(richText.type);
 const formatsDoc = sdbServer.get('docui', 'formats');
 const quillDoc = sdbServer.get('docs', 'example');
 formatsDoc.createIfEmpty({ formats: [] });
+quillDoc.createIfEmpty([{ insert: `
+XXXXXXXXXXXX XXXXXXXXXXXXX
+YYYYYYYYYYYY YYYYYYYYYYYYY
+ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
+` }], 'rich-text');
 const backendCompiler = new compile_ts_1.TSXCompiler({
     sandbox: {}
 });
@@ -112,11 +117,6 @@ formatsDoc.subscribe((type, ops) => {
 // `});
 // backendCodeDoc.createIfEmpty({ code: `
 // ` });
-// quillDoc.createIfEmpty([{insert: `
-// XXXXXXXXXXXX XXXXXXXXXXXXX
-// YYYYYYYYYYYY YYYYYYYYYYYYY
-// ZZZZZZZZZZZZ ZZZZZZZZZZZZZ
-// `}], 'rich-text');
 // displayCodeDoc.subscribe(throttle((type:string, ops) => {
 //     const data = displayCodeDoc.getData();
 //     if(data) {
