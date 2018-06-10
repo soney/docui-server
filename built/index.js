@@ -25,7 +25,7 @@ function getBackendClass(name) {
 sdb_ts_1.SDBServer.registerType(richText.type);
 const formatsDoc = sdbServer.get('docui', 'formats');
 const quillDoc = sdbServer.get('docs', 'example');
-formatsDoc.createIfEmpty({ formats: [] });
+formatsDoc.createIfEmpty({ formats: {} });
 quillDoc.createIfEmpty([{ insert: `
 XXXXXXXXXXXX XXXXXXXXXXXXX
 YYYYYYYYYYYY YYYYYYYYYYYYY

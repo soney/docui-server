@@ -36,7 +36,7 @@ SDBServer.registerType(richText.type);
 
 const formatsDoc:SDBDoc<FormatDoc> = sdbServer.get<FormatDoc>('docui', 'formats');
 const quillDoc:SDBDoc<QuillDoc> = sdbServer.get<QuillDoc> ('docs', 'example');
-formatsDoc.createIfEmpty({formats: []});
+formatsDoc.createIfEmpty({formats: {}});
 quillDoc.createIfEmpty([{insert: `
 XXXXXXXXXXXX XXXXXXXXXXXXX
 YYYYYYYYYYYY YYYYYYYYYYYYY
