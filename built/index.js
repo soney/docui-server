@@ -8,6 +8,7 @@ const path = require("path");
 const richText = require("rich-text");
 const compile_ts_1 = require("./compile_ts");
 const lodash_1 = require("lodash");
+const InlineBlot_1 = require("./InlineBlot");
 const ts = require("typescript");
 const PORT = 8000;
 const app = express();
@@ -15,12 +16,19 @@ app.use(express.static(path.resolve(__dirname, '..', 'node_modules', 'docui')));
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const sdbServer = new sdb_ts_1.SDBServer({ wss });
-const backendClasess = new Map();
-function setBackendClass(name, value) {
-    backendClasess.set(name, value);
+const backendClasses = new Map();
+const backendInstances = new Map();
+function setBackendInstance(blotId, backendInstance) {
+    backendInstances.set(blotId, backendInstance);
+    if (backendInstance) {
+        backendInstance.onAdded();
+    }
 }
-function getBackendClass(name) {
-    return backendClasess.get(name);
+function setBackendClass(formatId, value) {
+    backendClasses.set(formatId, value);
+}
+function getBackendClass(formatId) {
+    return backendClasses.get(formatId);
 }
 sdb_ts_1.SDBServer.registerType(richText.type);
 const formatsDoc = sdbServer.get('docui', 'formats');
@@ -43,20 +51,20 @@ function updateBackendCode(index) {
     const data = formatsDoc.getData();
     const p = ['formats', index, 'backendCode'];
     const backendCode = data.formats[index].backendCode.code;
-    const name = data.formats[index].name;
+    const { formatId } = data.formats[index];
     try {
         const backendCodeResult = backendCompiler.runTSXCode(backendCode);
         if (!lodash_1.has(backendCodeResult, 'default')) {
             throw new Error('Could not find default export');
         }
         const BackendClass = backendCodeResult['default'];
-        setBackendClass(name, BackendClass);
+        setBackendClass(formatId, BackendClass);
         formatsDoc.submitObjectReplaceOp(p.concat('error'), null);
     }
     catch (e) {
         formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
+        console.error(e);
     }
-    console.log('update backend code for ' + name);
 }
 function updateDisplayCode(index) {
     const data = formatsDoc.getData();
@@ -71,7 +79,6 @@ function updateDisplayCode(index) {
     catch (e) {
         formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
     }
-    console.log('update frontend code for ' + name);
 }
 formatsDoc.subscribe((type, ops) => {
     const data = formatsDoc.getData();
@@ -79,7 +86,7 @@ formatsDoc.subscribe((type, ops) => {
         if (type === 'op') {
             const { formats } = data;
             ops.forEach((op) => {
-                if (op.p.length === 2 && op.p[0] === 'formats' && lodash_1.has(op, 'li') && !lodash_1.has(op, 'ld')) { // new format added
+                if (op.p.length === 2 && op.p[0] === 'formats' && lodash_1.has(op, 'oi') && !lodash_1.has(op, 'od')) { // new format added
                     const index = op.p[1];
                     updateDisplayCode(index);
                     updateBackendCode(index);
@@ -92,6 +99,16 @@ formatsDoc.subscribe((type, ops) => {
                     }
                     else {
                         updateDisplayCode(index);
+                    }
+                }
+                else if (op.p.length === 4 && op.p[2] === 'blots' && lodash_1.has(op, 'oi')) { // blot added
+                    const { state } = op.oi;
+                    const formatId = op.p[1];
+                    const blotId = op.p[3];
+                    const BackendClass = getBackendClass(formatId);
+                    if (BackendClass) {
+                        const backendInstance = new BackendClass(new InlineBlot_1.InlineBlotBackend(formatsDoc, formatId, blotId));
+                        setBackendInstance(blotId, backendInstance);
                     }
                 }
             });

@@ -6,18 +6,21 @@ class InlineBlotDisplay {
 exports.InlineBlotDisplay = InlineBlotDisplay;
 ;
 class InlineBlotBackend {
-    constructor(stateDoc) {
-        this.stateDoc = stateDoc;
+    constructor(formatsDoc, formatId, blotId) {
+        this.formatsDoc = formatsDoc;
+        this.formatId = formatId;
+        this.blotId = blotId;
     }
     ;
     setState(state) {
         lodash_1.each(state, (value, key) => {
-            this.stateDoc.submitObjectReplaceOp(['state', key], value);
+            this.formatsDoc.submitObjectReplaceOp(['formats', this.formatId, 'blots', this.blotId, 'state', key], value);
         });
     }
     ;
     getState(key) {
-        const { state } = this.stateDoc.getData();
+        const { formats } = this.formatsDoc.getData();
+        const { state } = formats[this.formatId].blots[this.blotId];
         if (lodash_1.has(state, key)) {
             return state[key];
         }

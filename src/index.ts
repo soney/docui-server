@@ -23,13 +23,20 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 const sdbServer = new SDBServer({wss});
 
-const backendClasess:Map<string, any> = new Map<string, any>();
+const backendClasses:Map<string, any> = new Map<string, any>();
+const backendInstances:Map<string, any> = new Map<string, any>();
 
-function setBackendClass(name:string, value:any) {
-    backendClasess.set(name, value);
+function setBackendInstance(blotId:string, backendInstance:any) {
+    backendInstances.set(blotId, backendInstance);
+    if(backendInstance) {
+        backendInstance.onAdded();
+    }
 }
-function getBackendClass(name:string):any {
-    return backendClasess.get(name);
+function setBackendClass(formatId:string, value:any) {
+    backendClasses.set(formatId, value);
+}
+function getBackendClass(formatId:string):any {
+    return backendClasses.get(formatId);
 }
 
 SDBServer.registerType(richText.type);
@@ -57,19 +64,19 @@ function updateBackendCode(index:number) {
     const data = formatsDoc.getData();
     const p = ['formats', index, 'backendCode'];
     const backendCode = data.formats[index].backendCode.code;
-    const name = data.formats[index].name;
+    const {formatId} = data.formats[index];
     try {
         const backendCodeResult = backendCompiler.runTSXCode(backendCode);
         if(!has(backendCodeResult, 'default')) {
             throw new Error('Could not find default export');
         }
         const BackendClass = backendCodeResult['default'];
-        setBackendClass(name, BackendClass);
+        setBackendClass(formatId, BackendClass);
         formatsDoc.submitObjectReplaceOp(p.concat('error'), null);
     } catch(e) {
         formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
+        console.error(e);
     }
-    console.log('update backend code for ' + name);
 }
 function updateDisplayCode(index:number) {
     const data = formatsDoc.getData();
@@ -83,7 +90,6 @@ function updateDisplayCode(index:number) {
     } catch(e) {
         formatsDoc.submitObjectReplaceOp(p.concat('error'), `${e}`);
     }
-    console.log('update frontend code for ' + name);
 }
 
 formatsDoc.subscribe((type, ops) => {
@@ -92,7 +98,7 @@ formatsDoc.subscribe((type, ops) => {
         if(type === 'op') {
             const {formats} = data;
             ops.forEach((op) => {
-                if(op.p.length === 2 && op.p[0] === 'formats' && has(op, 'li') && !has(op, 'ld')) { // new format added
+                if(op.p.length === 2 && op.p[0] === 'formats' && has(op, 'oi') && !has(op, 'od')) { // new format added
                     const index:number = op.p[1];
                     updateDisplayCode(index);
                     updateBackendCode(index);
@@ -103,6 +109,16 @@ formatsDoc.subscribe((type, ops) => {
                         updateBackendCode(index);
                     } else {
                         updateDisplayCode(index);
+                    }
+                } else if(op.p.length === 4 && op.p[2]==='blots' && has(op, 'oi'))  { // blot added
+                    const {state} = op.oi;
+                    const formatId = op.p[1];
+                    const blotId = op.p[3];
+
+                    const BackendClass = getBackendClass(formatId);
+                    if(BackendClass) {
+                        const backendInstance = new BackendClass(new InlineBlotBackend(formatsDoc, formatId, blotId))
+                        setBackendInstance(blotId, backendInstance);
                     }
                 }
             });
