@@ -9,6 +9,7 @@ export declare class InlineBlotBackend {
     private formatId;
     private blotId;
     constructor(formatsDoc: SDBDoc<FormatDoc>, formatId: string, blotId: string);
+    getTextContent(): string;
     setState(state: {
         [key: string]: any;
     }): void;

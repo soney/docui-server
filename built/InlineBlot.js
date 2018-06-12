@@ -12,6 +12,10 @@ class InlineBlotBackend {
         this.blotId = blotId;
     }
     ;
+    getTextContent() {
+        return this.formatsDoc.traverse(['formats', this.formatId, 'blots', this.blotId, 'textContent']);
+    }
+    ;
     setState(state) {
         lodash_1.each(state, (value, key) => {
             this.formatsDoc.submitObjectReplaceOp(['formats', this.formatId, 'blots', this.blotId, 'state', key], value);
