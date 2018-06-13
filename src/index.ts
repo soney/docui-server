@@ -18,6 +18,7 @@ const PORT:number = 8000;
 
 const app = express();
 app.use(express.static(path.resolve(__dirname, '..', 'node_modules', 'docui')));
+app.use('/node_modules', express.static(path.resolve(__dirname, '..', 'node_modules')));
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
