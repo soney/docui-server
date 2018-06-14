@@ -13,6 +13,10 @@ export class InlineBlotBackend {
     public constructor(private formatsDoc:SDBDoc<FormatDoc>, private formatId:string, private blotId:string) {
     };
 
+    public getTextContent():string {
+        return this.formatsDoc.traverse(['formats', this.formatId, 'blots', this.blotId, 'textContent']);
+    };
+
     public setState(state:{[key:string]:any}):void {
         each(state, (value:any, key:string) => {
             this.formatsDoc.submitObjectReplaceOp(['formats', this.formatId, 'blots', this.blotId, 'state', key], value);

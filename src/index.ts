@@ -18,6 +18,7 @@ const PORT:number = 8000;
 
 const app = express();
 app.use(express.static(path.resolve(__dirname, '..', 'node_modules', 'docui')));
+app.use('/node_modules', express.static(path.resolve(__dirname, '..', 'node_modules')));
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
@@ -26,13 +27,16 @@ const sdbServer = new SDBServer({wss});
 const backendClasses:Map<string, any> = new Map<string, any>();
 const backendInstances:Map<string, any> = new Map<string, any>();
 
-function setBackendInstance(blotId:string, backendInstance:any) {
+function getBackendInstance(blotId:string):any {
+    return backendInstances.get(blotId);
+}
+function setBackendInstance(formatId:string, blotId:string, backendInstance:any):void {
     backendInstances.set(blotId, backendInstance);
     if(backendInstance) {
         backendInstance.onAdded();
     }
 }
-function setBackendClass(formatId:string, value:any) {
+function setBackendClass(formatId:string, value:any):void {
     backendClasses.set(formatId, value);
 }
 function getBackendClass(formatId:string):any {
@@ -76,7 +80,6 @@ function updateBackendCode(formatId:string) {
         formatsDoc.submitObjectReplaceOp(backendCodeP.concat('error'), null);
     } catch(e) {
         formatsDoc.submitObjectReplaceOp(backendCodeP.concat('error'), `${e}`);
-        console.error(e);
     }
 }
 function updateDisplayCode(formatId:string) {
@@ -100,27 +103,41 @@ formatsDoc.subscribe((type, ops) => {
         if(type === 'op') {
             const {formats} = data;
             ops.forEach((op) => {
-                if(op.p.length === 2 && op.p[0] === 'formats' && has(op, 'oi') && !has(op, 'od')) { // new format added
-                    const formatId:string = op.p[1];
+                const {p} = op;
+                if(p.length === 2 && p[0] === 'formats' && has(op, 'oi') && !has(op, 'od')) { // new format added
+                    const formatId:string = p[1];
                     updateDisplayCode(formatId);
                     updateBackendCode(formatId);
-                } else if(op.p.length === 5 && op.p[3] === 'code' && (has(op, 'si') || has(op, 'sd'))) { //modified
-                    const isBackend = op.p[2] === 'backendCode';
-                    const formatId:string = op.p[1];
+                } else if(p.length === 5 && p[3] === 'code' && (has(op, 'si') || has(op, 'sd'))) { //modified
+                    const isBackend = p[2] === 'backendCode';
+                    const formatId:string = p[1];
                     if(isBackend) {
                         updateBackendCode(formatId);
                     } else {
                         updateDisplayCode(formatId);
                     }
-                } else if(op.p.length === 4 && op.p[2]==='blots' && has(op, 'oi'))  { // blot added
+                } else if(p.length === 4 && p[2]==='blots' && has(op, 'oi'))  { // blot added
                     const {state} = op.oi;
-                    const formatId = op.p[1];
-                    const blotId = op.p[3];
+                    const formatId = p[1];
+                    const blotId = p[3];
 
                     const BackendClass = getBackendClass(formatId);
                     if(BackendClass) {
                         const backendInstance = new BackendClass(new InlineBlotBackend(formatsDoc, formatId, blotId))
-                        setBackendInstance(blotId, backendInstance);
+                        setBackendInstance(formatId, blotId, backendInstance);
+                    }
+                } else if(p.length === 5 && p[4] === 'textContent' && has(op, 'oi')) {
+                    const {oi} = op;
+                    const formatId = p[1];
+                    const blotId = p[3];
+
+                    const backendInstance = getBackendInstance(blotId);
+                    if(backendInstance && backendInstance.onTextContentChanged) {
+                        try {
+                            backendInstance.onTextContentChanged(oi);
+                        } catch(e) {
+                            console.error(e);
+                        }
                     }
                 }
             });
