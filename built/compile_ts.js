@@ -6,7 +6,10 @@ const vm2_1 = require("vm2");
 const lodash_1 = require("lodash");
 const path = require("path");
 const DEFAULT_NODE_VM_OPTIONS = {
-    sandbox: {}
+    sandbox: {},
+    require: {
+        external: true
+    }
 };
 const DEFAULT_TRANSPILE_OPTIONS = {
     jsx: ts.JsxEmit.React,

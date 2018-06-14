@@ -6,7 +6,10 @@ import {merge} from 'lodash';
 import * as path from 'path';
 
 const DEFAULT_NODE_VM_OPTIONS:NodeVMOptions = {
-    sandbox: {}
+    sandbox: {},
+    require: {
+        external: true
+    }
 };
 const DEFAULT_TRANSPILE_OPTIONS:ts.CompilerOptions = {
     jsx: ts.JsxEmit.React,

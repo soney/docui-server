@@ -11,7 +11,7 @@ import {TSXCompiler} from './compile_ts';
 import {throttle, has} from 'lodash';
 import * as Quill from 'quill';
 import { JSDOM } from 'jsdom';
-import {InlineBlotDisplay, InlineBlotBackend} from './InlineBlot';
+import {InlineBlotDisplay, InlineBlotBackend} from './backend_utilities/InlineBlot';
 import * as ts from 'typescript';
 
 const PORT:number = 8000;

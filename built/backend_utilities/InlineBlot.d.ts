@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormatDoc } from '../node_modules/docui/types/docTypes';
+import { FormatDoc } from '../../node_modules/docui/types/docTypes';
 import { SDBDoc } from 'sdb-ts';
 export declare abstract class InlineBlotDisplay {
     abstract render(): React.ReactNode;

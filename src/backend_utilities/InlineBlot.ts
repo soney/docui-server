@@ -1,7 +1,7 @@
 import { render } from "react-dom";
 import * as React from 'react';
 import * as ReactDOM from 'react';
-import { StateDoc, FormatDoc } from '../node_modules/docui/types/docTypes';
+import { StateDoc, FormatDoc } from '../../node_modules/docui/types/docTypes';
 import { SDBServer, SDBDoc } from 'sdb-ts';
 import { each, has } from 'lodash';
 
