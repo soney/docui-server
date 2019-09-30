@@ -22,7 +22,7 @@
     "@types/express": "^4.11.1",
     "@types/node": "^10.0.4",
     "@types/ws": "^5.1.0",
-    "docui": "https://github.com/soney/docui.git",
+    "docui": "git+https://github.com/soney/docui.git",
     "eval2": "^0.3.3",
     "express": "^4.16.3",
     "jsdom": "^11.11.0",
@@ -31,12 +31,12 @@
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "rich-text": "^3.1.0",
-    "sdb-ts": "https://github.com/soney/sdb-ts.git",
+    "sdb-ts": "git+https://github.com/soney/sdb-ts.git",
     "typescript": "^2.8.3",
     "vm2": "^3.6.0",
     "ws": "^5.1.1"
   },
   "devDependencies": {
-    "tslint": "^5.10.0"
+    "tslint": "^5.20.0"
   }
 }
