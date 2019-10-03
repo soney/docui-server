@@ -16,7 +16,7 @@ app.use(express.static(path.resolve(__dirname, '..', 'node_modules', 'docui')));
 app.use('/node_modules', express.static(path.resolve(__dirname, '..', 'node_modules')));
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const sdbServer = new sdb_ts_1.SDBServer({ wss });
+const sdbServer = new sdb_ts_1.SDBServer(wss);
 const backendClasses = new Map();
 const backendInstances = new Map();
 function getBackendInstance(blotId) {

@@ -22,7 +22,7 @@ app.use('/node_modules', express.static(path.resolve(__dirname, '..', 'node_modu
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
-const sdbServer = new SDBServer({wss});
+const sdbServer = new SDBServer(wss);
 
 const backendClasses:Map<string, any> = new Map<string, any>();
 const backendInstances:Map<string, any> = new Map<string, any>();
