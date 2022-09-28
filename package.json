@@ -33,7 +33,7 @@
     "rich-text": "^4.0.0",
     "sdb-ts": "^0.3.0",
     "typescript": "^3.6.3",
-    "vm2": "^3.6.0",
+    "vm2": "^3.9.11",
     "ws": "^7.1.2"
   },
   "devDependencies": {
